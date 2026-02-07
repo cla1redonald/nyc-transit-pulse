@@ -30,7 +30,7 @@
     --chart-4: 0 166 92;
     --chart-5: 185 51 173;
 
-    /* MTA Mode Colors */
+    /* MTA Mode Colors (consistent across themes) */
     --color-subway: 0 57 166;
     --color-bus: 255 99 25;
     --color-lirr: 252 204 10;
@@ -43,7 +43,7 @@
   .dark {
     --background: 10 10 15;
     --foreground: 240 240 245;
-    --card: 17 17 24;
+    --card: 26 26 46;
     --card-foreground: 240 240 245;
     --popover: 26 26 46;
     --popover-foreground: 240 240 245;

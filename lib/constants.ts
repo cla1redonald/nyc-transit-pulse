@@ -45,4 +45,5 @@ export const DATE_RANGE_PRESETS = {
   ytd: { label: 'Year to Date' },
   '1y': { days: 365, label: '1 Year' },
   all: { label: 'All Data' },
+  custom: { label: 'Custom' },
 } as const
