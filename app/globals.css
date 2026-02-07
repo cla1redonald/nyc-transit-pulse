@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 248 249 252;
+    --foreground: 26 26 46;
+    --card: 255 255 255;
+    --card-foreground: 26 26 46;
+    --popover: 255 255 255;
+    --popover-foreground: 26 26 46;
+    --primary: 0 57 166;
+    --primary-foreground: 240 240 245;
+    --secondary: 240 241 245;
+    --secondary-foreground: 26 26 46;
+    --muted: 240 241 245;
+    --muted-foreground: 136 136 160;
+    --accent: 240 241 245;
+    --accent-foreground: 26 26 46;
+    --destructive: 238 53 46;
+    --destructive-foreground: 240 240 245;
+    --border: 208 209 216;
+    --input: 208 209 216;
+    --ring: 0 57 166;
+    --radius: 0.5rem;
+    --chart-1: 0 57 166;
+    --chart-2: 255 99 25;
+    --chart-3: 252 204 10;
+    --chart-4: 0 166 92;
+    --chart-5: 185 51 173;
+
+    /* MTA Mode Colors */
+    --color-subway: 0 57 166;
+    --color-bus: 255 99 25;
+    --color-lirr: 252 204 10;
+    --color-metro-north: 0 166 92;
+    --color-access-a-ride: 185 51 173;
+    --color-bridges-tunnels: 109 110 113;
+    --color-sir: 29 93 168;
+  }
+
+  .dark {
+    --background: 10 10 15;
+    --foreground: 240 240 245;
+    --card: 17 17 24;
+    --card-foreground: 240 240 245;
+    --popover: 26 26 46;
+    --popover-foreground: 240 240 245;
+    --primary: 0 57 166;
+    --primary-foreground: 240 240 245;
+    --secondary: 35 35 56;
+    --secondary-foreground: 240 240 245;
+    --muted: 35 35 56;
+    --muted-foreground: 136 136 160;
+    --accent: 35 35 56;
+    --accent-foreground: 240 240 245;
+    --destructive: 238 53 46;
+    --destructive-foreground: 240 240 245;
+    --border: 42 42 62;
+    --input: 42 42 62;
+    --ring: 0 57 166;
+    --chart-1: 0 57 166;
+    --chart-2: 255 99 25;
+    --chart-3: 252 204 10;
+    --chart-4: 0 166 92;
+    --chart-5: 185 51 173;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
