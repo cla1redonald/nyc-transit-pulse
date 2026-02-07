@@ -3,66 +3,141 @@
 import { useMemo } from 'react'
 import { KPICard } from './KPICard'
 import { useFilters } from '@/lib/filter-context'
-import type { DailyRidership, TransitMode } from '@/types/transit'
+import type { DailyRidership, TransitMode, RecoveryData } from '@/types/transit'
 import dailyDataRaw from '@/data/daily.json'
+import recoveryDataRaw from '@/data/recovery.json'
 
 const dailyData = dailyDataRaw as DailyRidership[]
+const recoveryData = recoveryDataRaw as RecoveryData[]
+
+const TARGET_BARS = 30
+
+const MODE_TO_RECOVERY_KEY: Record<TransitMode, keyof RecoveryData> = {
+  subway: 'subwayPct',
+  bus: 'busPct',
+  lirr: 'lirrPct',
+  metroNorth: 'metroNorthPct',
+  accessARide: 'accessARidePct',
+  bridgesTunnels: 'bridgesTunnelsPct',
+  sir: 'sirPct',
+}
+
+function sumModes(d: DailyRidership, modes: TransitMode[]): number {
+  let sum = 0
+  for (const m of modes) {
+    sum += (d[m] as number) || 0
+  }
+  return sum
+}
+
+function avg(data: DailyRidership[], fn: (d: DailyRidership) => number): number {
+  if (data.length === 0) return 0
+  return data.reduce((acc, d) => acc + fn(d), 0) / data.length
+}
+
+function downsample(data: DailyRidership[], target: number): DailyRidership[] {
+  if (data.length <= target) return data
+  const step = data.length / target
+  const result: DailyRidership[] = []
+  for (let i = 0; i < target; i++) {
+    result.push(data[Math.floor(i * step)])
+  }
+  return result
+}
 
 export function KPISection() {
   const { activeModes, filterDataByDateRange } = useFilters()
 
-  const kpiData = useMemo(() => {
-    const filteredData = filterDataByDateRange(dailyData)
+  const activeModesArray = useMemo(
+    () => Array.from(activeModes) as TransitMode[],
+    [activeModes]
+  )
 
-    if (filteredData.length === 0) {
+  const kpis = useMemo(() => {
+    const filtered = filterDataByDateRange(dailyData)
+
+    if (filtered.length === 0) {
       return {
-        totalRidership: 0,
-        change7d: 0,
-        recoveryPct: 85,
-        sparklineTotal: [],
-        sparkline7d: [],
+        avgTotal: 0,
+        periodChange: 0,
+        recoveryPct: 0,
+        sparklineTotal: [] as number[],
+        sparklinePeriod: [] as number[],
       }
     }
 
-    // Get last 30 days for sparklines (or available data if less)
-    const sparklineCount = Math.min(30, filteredData.length)
-    const sparklineData = filteredData.slice(-sparklineCount)
+    const sumActive = (d: DailyRidership) => sumModes(d, activeModesArray)
 
-    // Calculate total ridership for active modes
-    const calculateTotal = (item: DailyRidership) => {
+    // PERIOD AVERAGE (not last day's value — London lesson)
+    const avgTotal = Math.round(avg(filtered, sumActive))
+
+    // Period-over-period change: compare current period avg to equivalent prior period avg
+    const periodLen = filtered.length
+    const priorStart = new Date(filtered[0].date)
+    priorStart.setDate(priorStart.getDate() - periodLen)
+    const priorData = dailyData.filter((d) => {
+      const dt = new Date(d.date)
+      return dt >= priorStart && dt < new Date(filtered[0].date)
+    })
+    const priorAvg = avg(priorData, sumActive)
+    const periodChange = priorAvg > 0 ? ((avgTotal - priorAvg) / priorAvg) * 100 : 0
+
+    // Recovery % from actual recovery data (not hardcoded)
+    const filteredRecovery = filterDataByDateRange(recoveryData)
+    let recoveryPct = 0
+    if (filteredRecovery.length > 0) {
+      // Weighted average of active modes' recovery percentages
+      let totalWeight = 0
+      let weightedSum = 0
+      for (const mode of activeModesArray) {
+        const key = MODE_TO_RECOVERY_KEY[mode]
+        const modeAvgRecovery =
+          filteredRecovery.reduce((acc, d) => acc + ((d[key] as number) || 0), 0) /
+          filteredRecovery.length
+        // Weight by ridership volume
+        const modeAvgRidership = avg(filtered, (d) => (d[mode] as number) || 0)
+        weightedSum += modeAvgRecovery * modeAvgRidership
+        totalWeight += modeAvgRidership
+      }
+      recoveryPct = totalWeight > 0 ? (weightedSum / totalWeight) * 100 : 0
+    }
+
+    // Sparklines: downsample FULL filtered range to ~30 bars (not slice(-30) — London lesson)
+    const sampled = downsample(filtered, TARGET_BARS)
+    const sparklineTotal = sampled.map(sumActive)
+
+    // Recovery sparkline from sampled recovery data
+    const sampledRecovery = filteredRecovery.length <= TARGET_BARS
+      ? filteredRecovery
+      : (() => {
+          const step = filteredRecovery.length / TARGET_BARS
+          const r: RecoveryData[] = []
+          for (let i = 0; i < TARGET_BARS; i++) {
+            r.push(filteredRecovery[Math.floor(i * step)])
+          }
+          return r
+        })()
+    const sparklineRecovery = sampledRecovery.map((d) => {
       let total = 0
-      activeModes.forEach((mode) => {
-        total += item[mode] || 0
-      })
-      return total
-    }
-
-    const sparklineTotal = sparklineData.map(calculateTotal)
-
-    // Latest value
-    const latest = filteredData[filteredData.length - 1]
-    const totalRidership = calculateTotal(latest)
-
-    // 7-day change
-    let change7d = 0
-    if (filteredData.length >= 7) {
-      const sevenDaysAgo = filteredData[filteredData.length - 7]
-      const prev = calculateTotal(sevenDaysAgo)
-      change7d = prev > 0 ? ((totalRidership - prev) / prev) * 100 : 0
-    }
-
-    // Recovery percentage (simple average for now)
-    // In a real implementation, this would be weighted by ridership volume
-    const recoveryPct = 85
+      let count = 0
+      for (const mode of activeModesArray) {
+        const val = d[MODE_TO_RECOVERY_KEY[mode]] as number
+        if (val > 0) {
+          total += val
+          count++
+        }
+      }
+      return count > 0 ? total / count * 100 : 0
+    })
 
     return {
-      totalRidership,
-      change7d,
+      avgTotal,
+      periodChange,
       recoveryPct,
       sparklineTotal,
-      sparkline7d: sparklineTotal.slice(-7),
+      sparklineRecovery,
     }
-  }, [activeModes, filterDataByDateRange])
+  }, [activeModesArray, filterDataByDateRange])
 
   return (
     <section className="space-y-4" aria-label="Key Performance Indicators">
@@ -70,22 +145,22 @@ export function KPISection() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <KPICard
           label="Avg Daily Ridership"
-          value={kpiData.totalRidership}
-          delta={kpiData.change7d}
-          sparklineData={kpiData.sparklineTotal}
+          value={kpis.avgTotal}
+          delta={kpis.periodChange}
+          sparklineData={kpis.sparklineTotal}
           valueFormat="number"
         />
         <KPICard
-          label="Week over Week"
-          value={Math.abs(kpiData.change7d)}
-          delta={kpiData.change7d}
-          sparklineData={kpiData.sparkline7d}
+          label="Period Change"
+          value={Math.abs(kpis.periodChange)}
+          delta={kpis.periodChange}
+          sparklineData={kpis.sparklineTotal.slice(-7)}
           valueFormat="percent"
         />
         <KPICard
           label="vs. Pre-Pandemic"
-          value={kpiData.recoveryPct}
-          sparklineData={[]}
+          value={kpis.recoveryPct}
+          sparklineData={kpis.sparklineRecovery}
           valueFormat="percent"
         />
       </div>

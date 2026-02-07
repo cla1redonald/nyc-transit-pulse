@@ -12,7 +12,7 @@ describe('KPI Integration with Filters', () => {
     )
 
     expect(screen.getByText('Avg Daily Ridership')).toBeInTheDocument()
-    expect(screen.getByText('Week over Week')).toBeInTheDocument()
+    expect(screen.getByText('Period Change')).toBeInTheDocument()
     expect(screen.getByText('vs. Pre-Pandemic')).toBeInTheDocument()
   })
 
