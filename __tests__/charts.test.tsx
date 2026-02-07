@@ -40,8 +40,9 @@ describe('RidershipTrendChart', () => {
       </FilterProvider>
     )
 
-    expect(screen.getByText('Ridership Trends')).toBeInTheDocument()
-    expect(screen.getByText('Daily ridership by transit mode')).toBeInTheDocument()
+    // Chart should render without crashing
+    // Note: Headings are now in page.tsx, not in the chart component
+    expect(screen.getByTestId('responsive-container')).toBeInTheDocument()
   })
 
   it('renders chart components', () => {
@@ -99,8 +100,9 @@ describe('ModeComparisonChart', () => {
       </FilterProvider>
     )
 
-    expect(screen.getByText('Mode Composition')).toBeInTheDocument()
-    expect(screen.getByText('Stacked ridership by transit mode over time')).toBeInTheDocument()
+    // Chart should render without crashing
+    // Note: Headings are now in page.tsx, not in the chart component
+    expect(screen.getByTestId('responsive-container')).toBeInTheDocument()
   })
 
   it('renders chart components', () => {

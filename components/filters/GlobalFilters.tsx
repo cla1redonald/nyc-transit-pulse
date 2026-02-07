@@ -23,8 +23,8 @@ export function GlobalFilters() {
   const { dateRange, activeModes, setPreset, toggleMode } = useFilters()
 
   return (
-    <div className="sticky top-14 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-3">
+    <div className="sticky top-14 z-40 bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/60 border-b">
+      <div className="py-4 space-y-3">
         {/* Date Range Presets */}
         <div className="flex items-center gap-2 overflow-x-auto pb-2">
           <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">

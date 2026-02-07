@@ -113,14 +113,7 @@ export function ModeComparisonChart() {
   }
 
   return (
-    <div className="rounded-lg border border-border bg-card p-6">
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold text-foreground">Mode Composition</h3>
-        <p className="text-sm text-muted-foreground">
-          Stacked ridership by transit mode over time
-        </p>
-      </div>
-
+    <div className="rounded-xl border border-border bg-card shadow-sm p-6">
       <ResponsiveContainer width="100%" height={400}>
         <AreaChart
           data={chartData}

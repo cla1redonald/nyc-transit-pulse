@@ -41,11 +41,7 @@ export function RidershipTrendChart() {
   }
 
   return (
-    <div className="rounded-lg border border-border bg-card p-6">
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold text-foreground">Ridership Trends</h3>
-        <p className="text-sm text-muted-foreground">Daily ridership by transit mode</p>
-      </div>
+    <div className="rounded-xl border border-border bg-card shadow-sm p-6">
 
       <ResponsiveContainer width="100%" height={400}>
         <LineChart

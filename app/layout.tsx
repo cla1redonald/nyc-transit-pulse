@@ -7,8 +7,20 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "NYC Transit Pulse",
-  description: "Real-time visualization of NYC MTA ridership data and pandemic recovery trends",
+  title: "NYC Transit Pulse — MTA Ridership Dashboard",
+  description: "Interactive visualization of NYC MTA ridership data across Subway, Bus, LIRR, Metro-North, and more. Explore pandemic recovery, congestion pricing impact, and day-of-week patterns.",
+  keywords: "NYC, MTA, transit, ridership, subway, bus, data visualization, pandemic recovery, congestion pricing",
+  authors: [{ name: "Claire Donald" }],
+  openGraph: {
+    title: "NYC Transit Pulse — MTA Ridership Dashboard",
+    description: "Interactive visualization of NYC MTA ridership data across Subway, Bus, LIRR, Metro-North, and more.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "NYC Transit Pulse — MTA Ridership Dashboard",
+    description: "Interactive visualization of NYC MTA ridership data across all transit modes.",
+  },
 };
 
 export default function RootLayout({
