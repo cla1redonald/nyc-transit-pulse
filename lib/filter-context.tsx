@@ -41,8 +41,11 @@ const DEFAULT_ACTIVE_MODES = new Set<TransitMode>([
 ])
 
 // Default to 1 year
+// Use latest data date (2025-01-09) instead of "today" since data is static
+const LATEST_DATA_DATE = new Date('2025-01-09')
+
 const computeInitialDateRange = (): DateRange => {
-  const end = new Date()
+  const end = LATEST_DATA_DATE
   const start = subDays(end, 365)
   return { start, end, preset: '1y' }
 }
@@ -54,29 +57,30 @@ export function FilterProvider({ children }: { children: ReactNode }) {
 
   const computeDateRange = useMemo(
     () => (preset: DatePreset, customStart?: Date, customEnd?: Date): DateRange => {
-      const today = new Date()
+      // Use latest data date instead of "today" since data is static
+      const latestDate = LATEST_DATA_DATE
 
       switch (preset) {
         case '7d':
-          return { start: subDays(today, 7), end: today, preset }
+          return { start: subDays(latestDate, 7), end: latestDate, preset }
         case '30d':
-          return { start: subDays(today, 30), end: today, preset }
+          return { start: subDays(latestDate, 30), end: latestDate, preset }
         case '90d':
-          return { start: subDays(today, 90), end: today, preset }
+          return { start: subDays(latestDate, 90), end: latestDate, preset }
         case 'ytd':
-          return { start: startOfYear(today), end: today, preset }
+          return { start: startOfYear(latestDate), end: latestDate, preset }
         case '1y':
-          return { start: subDays(today, 365), end: today, preset }
+          return { start: subDays(latestDate, 365), end: latestDate, preset }
         case 'all':
           // MTA data starts March 2020
-          return { start: new Date('2020-03-01'), end: today, preset }
+          return { start: new Date('2020-03-01'), end: latestDate, preset }
         case 'custom':
           if (!customStart || !customEnd) {
-            return { start: subDays(today, 365), end: today, preset: '1y' }
+            return { start: subDays(latestDate, 365), end: latestDate, preset: '1y' }
           }
           return { start: customStart, end: customEnd, preset }
         default:
-          return { start: subDays(today, 365), end: today, preset: '1y' }
+          return { start: subDays(latestDate, 365), end: latestDate, preset: '1y' }
       }
     },
     []
